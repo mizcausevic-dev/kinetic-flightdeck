@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { fleet, findEntity } from '../data/fleet';
 import { incidents } from '../data/incidents';
 import { buildFleetPosture, evaluateEntity } from '../aggregators/posture-aggregator';
@@ -7,6 +8,20 @@ import { buildRiskMatrix } from '../aggregators/risk-matrix';
 import { buildOwnerMap } from '../aggregators/owner-map';
 
 export const flightdeckRouter = Router();
+
+const incidentQuery = z.object({
+  source: z.enum(['mcp-sentinel', 'agent-codex', 'agentobserve']).optional(),
+  severity: z.enum(['critical', 'high', 'medium', 'low', 'info']).optional(),
+  status: z.enum(['open', 'acknowledged', 'resolved']).optional(),
+  entityId: z.string().min(1).max(128).optional(),
+}).strict();
+
+const timelineQuery = z.object({
+  hours: z.preprocess(
+    (value) => value === undefined ? '24' : value,
+    z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(1).max(168))
+  ),
+}).strict();
 
 // GET /api/flightdeck/posture — full fleet posture rollup
 flightdeckRouter.get('/posture', (_req, res) => {
@@ -25,12 +40,12 @@ flightdeckRouter.get('/posture/:entityId', (req, res) => {
 
 // GET /api/flightdeck/incidents — full incident feed with optional filters
 flightdeckRouter.get('/incidents', (req, res) => {
-  const filtered = filterIncidents(incidents, {
-    source: req.query.source as never,
-    severity: req.query.severity as never,
-    status: req.query.status as never,
-    entityId: req.query.entityId as string | undefined,
-  });
+  const parsed = incidentQuery.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid incident filters' });
+    return;
+  }
+  const filtered = filterIncidents(incidents, parsed.data);
   res.json({
     summary: buildIncidentSummary(filtered),
     incidents: filtered,
@@ -39,7 +54,12 @@ flightdeckRouter.get('/incidents', (req, res) => {
 
 // GET /api/flightdeck/timeline?hours=24 — recent incident timeline
 flightdeckRouter.get('/timeline', (req, res) => {
-  const hours = parseInt((req.query.hours as string) || '24', 10);
+  const parsed = timelineQuery.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'hours must be an integer from 1 to 168' });
+    return;
+  }
+  const { hours } = parsed.data;
   res.json({
     windowHours: hours,
     incidents: buildTimeline(incidents, hours),
@@ -67,6 +87,7 @@ flightdeckRouter.get('/summary', (_req, res) => {
 
   res.json({
     generatedAt: new Date().toISOString(),
+    dataMode: 'synthetic-demo',
     headline: {
       totalEntities: posture.summary.totalEntities,
       productionAtRisk: posture.summary.productionAtRisk,

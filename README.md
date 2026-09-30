@@ -5,11 +5,11 @@
 [![TypeScript](https://img.shields.io/badge/typescript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-66FCF1)](LICENSE)
 
-Unified ops console for AI Platform Engineering — aggregates **MCP server posture**, **governance decisions**, and **agent fleet observability** into a single pane of glass that platform PMs, CISOs, and SRE leads can scan in 30 seconds.
+Synthetic API and read-only preview for exploring how **MCP server posture**, **governance decisions**, and **agent fleet observability** could be combined for an operator. All entities, incidents, costs, and scores in this repository are illustrative fixtures.
 
 ## Why This Exists
 
-Once an enterprise is running 6–10 MCP servers, a handful of agent fleets, and a governance overlay, leadership has three different dashboards to check before standup. Flightdeck is the meta-layer that **rolls those dashboards up into one operator view** — composite posture per entity, unified incident feed across pillars, accountability by owning team, and a Monday-morning summary that fits on one screen.
+Teams operating multiple MCP servers and agent fleets need a coherent way to review posture, incidents, and ownership. Flightdeck demonstrates a possible operator view using checked-in sample data. It does not yet connect to the three upstream services.
 
 This repo is the third pillar in a trilogy:
 
@@ -27,47 +27,46 @@ This repo is the third pillar in a trilogy:
 | Runtime | Node.js + TypeScript |
 | Framework | Express 5 |
 | Domain | AI Platform Engineering operator console |
-| Aggregation Areas | Composite posture · Unified incidents · Risk matrix · Owner accountability · Cost rollup · Timeline |
+| Aggregation Areas | Illustrative composite posture · Fixture incidents · Risk matrix · Owner accountability · Timeline |
 | Operational Outputs | Fleet posture summary · Risk matrix · Top-risk entities · Team scorecards · Monday-morning headline |
 
 ## Operator Console Preview
 
-![Kinetic Flightdeck operator console — KPIs, top-risk entities, risk matrix, unified incident timeline, and owner scorecards](docs/hero.png)
+![Flightdeck local API preview with a visible synthetic-demo banner, fixture KPIs, risk matrix, incident feed, and owner scorecards](docs/hero.png)
 
-A single page that fits the whole AI platform on one screen: composite KPIs at the top, top-risk entities and their next actions, the 7×5 risk matrix, the unified incident timeline pulling from all three pillars, and team scorecards with the attention-needed teams floated up first.
+This screenshot was captured from `http://127.0.0.1:3000/preview/` with the local API running. The page fetches the API's checked-in fixtures; it does not display production telemetry. [Phone preview](docs/mobile.png).
 
 ## Composite Score Methodology
 
-Flightdeck doesn't invent posture data — it **synthesizes** the three pillars into one operator-friendly score using a weighted composite that reflects platform-engineering doctrine:
+The prototype computes a weighted composite from invented fixture scores. The weights are design choices for this demo, not validated risk or compliance methodology:
 
 | Pillar | Weight | Reasoning |
 |---|---|---|
 | Security (mcp-sentinel) | 0.45 | A security incident dominates other concerns |
-| Governance (agent-codex) | 0.30 | Compliance is binary in regulated environments |
+| Governance (agent-codex) | 0.30 | Gives sample policy signals meaningful weight |
 | Operations (agentobserve) | 0.25 | Degradation is recoverable; breach is not |
 
-A single critical signal (security score < 50, multiple SLA breaches, or > 20% budget overrun) **overrides the composite** and forces a `critical` or `degraded` status. This is the "platform thinking" doctrine: a 90 composite with one open critical security incident is still critical.
+Selected signals (security score < 50, multiple SLA breaches, or > 20% budget overrun) override the composite and force a `critical` or `degraded` demo status. These labels are triage cues for fixtures, not regulatory findings.
 
 ## Architecture
 
 ```
-mcp-sentinel ──┐
-agent-codex  ──┼──► flightdeck aggregators ──► /api/flightdeck/* ──► Operator UI
-agentobserve ──┘
+checked-in fleet and incident fixtures ──► aggregators ──► /api/flightdeck/* ──► /preview/
 ```
 
-In production, flightdeck polls the three pillar services (or reads shared storage). In this repo, fleet/incident data is mocked to demonstrate the aggregation logic and operator outputs without requiring the other services running.
+There is no upstream polling, persistence, authentication, or production deployment configuration. The API binds to `127.0.0.1` by default and returns `X-Data-Mode: synthetic-demo`. Do not expose it on a public interface or use its scores for operational or compliance decisions.
 
 ## API Endpoints
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| GET | `/health` | Service status + upstream URLs |
+| GET | `/health` | Service status and synthetic-data disclosure |
+| GET | `/preview/` | Read-only UI populated by the local API |
 | GET | `/api/flightdeck/summary` | Monday-morning operator headline (top-3 risks, attention-needed teams, KPIs) |
 | GET | `/api/flightdeck/posture` | Full fleet rollup with summary + per-entity scores |
 | GET | `/api/flightdeck/posture/:entityId` | Single entity composite posture |
 | GET | `/api/flightdeck/incidents` | Unified incident feed; filters: `source`, `severity`, `status`, `entityId` |
-| GET | `/api/flightdeck/timeline?hours=N` | Recent incident timeline, newest first |
+| GET | `/api/flightdeck/timeline?hours=N` | Fixture incidents detected within the last 1–168 hours, newest first; historical fixtures currently return an empty window |
 | GET | `/api/flightdeck/risk-matrix` | N×M matrix of entities × risk dimensions |
 | GET | `/api/flightdeck/owners` | Team scorecards sorted by attention-needed |
 
@@ -75,20 +74,21 @@ In production, flightdeck polls the three pillar services (or reads shared stora
 
 ```json
 {
-  "generatedAt": "2026-05-07T20:30:00Z",
+  "generatedAt": "<request-time ISO 8601>",
+  "dataMode": "synthetic-demo",
   "headline": {
     "totalEntities": 7,
     "productionAtRisk": 2,
-    "averageComposite": 78,
+    "averageComposite": 77,
     "openIncidents": 4,
     "criticalIncidents": 1,
-    "teamsNeedingAttention": 1
+    "teamsNeedingAttention": 2
   },
   "topRiskEntities": [
     {
       "entityId": "srv_internal_crm",
       "name": "Internal CRM Bridge",
-      "composite": { "overall": 47, "security": 35, "governance": 48, "operations": 62 },
+      "composite": { "overall": 46, "security": 35, "governance": 48, "operations": 62 },
       "status": "critical",
       "recommendedNextAction": "Quarantine entity; engage SecOps + platform on-call; suspend production traffic."
     }
@@ -136,7 +136,7 @@ In production, flightdeck polls the three pillar services (or reads shared stora
 ```bash
 git clone https://github.com/mizcausevic-dev/kinetic-flightdeck.git
 cd kinetic-flightdeck
-npm install
+npm ci
 npm run dev
 ```
 
@@ -144,6 +144,7 @@ Visit:
 - `http://localhost:3000/health`
 - `http://localhost:3000/api/flightdeck/summary`
 - `http://localhost:3000/api/flightdeck/risk-matrix`
+- `http://localhost:3000/preview/`
 
 ### Run Tests
 
@@ -151,16 +152,16 @@ Visit:
 npm test
 ```
 
-19 unit tests across posture aggregation, incident filtering, risk matrix, and owner-team scorecards.
+The test suite covers posture aggregation, incident filtering, risk matrix, owner-team scorecards, and HTTP validation.
 
 ## What This Demonstrates
 
-- AI platform engineering as a unified operator surface, not three disconnected dashboards
+- A possible unified operator view of three pillar concepts using sample data
 - Composite scoring that respects platform-engineering doctrine (security dominates)
 - Override logic — single critical signals override good composites (the "90 + critical = critical" rule)
 - N×M risk matrix as a CISO-readable view across entities and dimensions
 - Owner-team accountability rollup mapped to incident exposure
-- Production-minded TypeScript API with strict mode, full test coverage, CI matrix on Node 20 + 22
+- A TypeScript API with strict mode and CI on Node 20 + 22; production integrations and authorization remain future work
 
 ## Future Enhancements
 
@@ -174,7 +175,7 @@ npm test
 ## Tech Stack
 
 - Node.js, TypeScript, Express, Zod
-- Helmet, CORS, Morgan
+- Helmet
 - Node test runner
 
 ## Portfolio Links

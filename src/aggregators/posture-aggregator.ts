@@ -27,7 +27,7 @@ export interface FlightdeckPosture {
 
 // Composite score weights — security gets the highest weight because in
 // platform engineering, a security incident dominates other concerns.
-// Governance second (compliance is binary in regulated environments).
+// Governance second. This fixture score is illustrative and is not a compliance determination.
 // Operations third (degradation is recoverable; breach is not).
 const WEIGHTS = {
   security: 0.45,

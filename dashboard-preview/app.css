@@ -1,0 +1,55 @@
+:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; background: #08121a; color: #eaf5f5; }
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(circle at 80% 0, #173743 0, transparent 35%), #08121a; line-height: 1.5; }
+.shell { max-width: 1440px; margin: auto; padding: 36px 30px 80px; }
+.masthead { display: flex; align-items: start; justify-content: space-between; gap: 30px; border-bottom: 1px solid #2d4852; padding-bottom: 28px; }
+.eyebrow { color: #6fe0d3; text-transform: uppercase; letter-spacing: .2em; font-size: .74rem; font-weight: 800; margin: 0 0 14px; }
+h1 { font-size: clamp(2.3rem, 5vw, 4.5rem); line-height: 1.05; letter-spacing: -.05em; margin: 0; }
+h2 { font-size: 1.35rem; letter-spacing: -.02em; margin: 0; }
+.subtitle { color: #adbec5; font-size: 1.08rem; max-width: 640px; margin: 14px 0 0; }
+.mode { white-space: nowrap; border: 1px solid #497a6c; background: #14392f; padding: 9px 14px; border-radius: 999px; color: #adf2d4; font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.mode span { color: #55e5a4; }
+.notice { border-left: 4px solid #69dccc; background: #112d35; color: #c4e3e4; padding: 15px 18px; margin: 26px 0 12px; }
+.notice strong { color: #eafdfa; }
+.load-status { color: #bcd6d9; min-height: 25px; }
+main { display: grid; gap: 34px; }
+section { min-width: 0; }
+.section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 0 0 14px; }
+.section-heading p { color: #93aeb8; font-size: .8rem; margin: 0; }
+.metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.metric, .risk, .owner, .table-wrap, .incidents { border: 1px solid #27434e; background: #0e202a; border-radius: 14px; }
+.metric { padding: 18px; }
+.metric strong { display: block; font-size: 2.25rem; line-height: 1.1; font-variant-numeric: tabular-nums; margin: 8px 0; }
+.metric span { display: block; color: #9ab4bc; font-size: .77rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 800; }
+.metric small { color: #98aeb6; }
+.risk-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.risk { padding: 18px; min-height: 182px; }
+.risk-head, .owner-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.risk h3, .owner h3 { font-size: 1.05rem; margin: 0; }
+.risk p, .owner p { color: #abc0c5; font-size: .87rem; margin: 10px 0 0; }
+.risk .score { font-size: 2rem; font-weight: 800; color: #e6f5f4; }
+.badge { padding: 3px 8px; border-radius: 6px; font-size: .71rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 800; }
+.critical, .red { background: #4a202b; color: #ffb6bd; }
+.degraded, .orange { background: #503a24; color: #ffd197; }
+.review, .yellow { background: #4b4527; color: #f2e6a3; }
+.healthy, .green { background: #1d453d; color: #aaf0cb; }
+.columns { display: grid; grid-template-columns: 1.6fr 1fr; gap: 22px; }
+.table-wrap { overflow: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .84rem; }
+caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+th, td { text-align: left; padding: 11px; border-bottom: 1px solid #24404a; }
+th { color: #9bc0c4; font-weight: 700; }
+tbody tr:last-child td { border-bottom: 0; }
+.level { text-transform: capitalize; font-size: .72rem; border-radius: 5px; padding: 3px 7px; font-weight: 800; }
+.owners { display: grid; gap: 8px; }
+.owner { padding: 13px 15px; }
+.owner p { margin: 5px 0 0; }
+.incidents { list-style: none; padding: 0; margin: 0; }
+.incidents li { display: grid; grid-template-columns: 110px 120px 100px 1fr; gap: 14px; padding: 12px 16px; border-bottom: 1px solid #24404a; font-size: .84rem; }
+.incidents li:last-child { border: 0; }
+.incidents time, .incidents .source { color: #9bb7bd; }
+.incidents .severity { font-weight: 800; text-transform: uppercase; }
+.incidents .severity.critical, .incidents .severity.high { color: #ffb6bd; background: none; }
+.incidents .severity.medium { color: #f2e6a3; }
+@media (max-width: 980px) { .metrics { grid-template-columns: repeat(3, 1fr); } .risk-list { grid-template-columns: repeat(2, 1fr); } .columns { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .shell { padding: 22px 15px 60px; } .masthead { display: block; } .mode { display: inline-block; margin-top: 18px; } .section-heading { display: block; } .section-heading p { margin-top: 4px; } .metrics { grid-template-columns: repeat(2, 1fr); } .risk-list { grid-template-columns: 1fr; } .incidents li { grid-template-columns: 1fr 1fr; gap: 4px 12px; } .incidents li .message { grid-column: 1 / -1; } }
