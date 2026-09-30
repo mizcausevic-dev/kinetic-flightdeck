@@ -7,10 +7,6 @@
 
 Unified ops console for AI Platform Engineering — aggregates **MCP server posture**, **governance decisions**, and **agent fleet observability** into a single pane of glass that platform PMs, CISOs, and SRE leads can scan in 30 seconds.
 
-> Recruiter takeaway:
->
-> *"This person doesn't think of MCP governance, AI policy enforcement, and agent observability as three products. They treat them as one platform layer with one operator surface — which is exactly how enterprises buy this stuff."*
-
 ## Why This Exists
 
 Once an enterprise is running 6–10 MCP servers, a handful of agent fleets, and a governance overlay, leadership has three different dashboards to check before standup. Flightdeck is the meta-layer that **rolls those dashboards up into one operator view** — composite posture per entity, unified incident feed across pillars, accountability by owning team, and a Monday-morning summary that fits on one screen.
