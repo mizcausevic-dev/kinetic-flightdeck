@@ -70,7 +70,9 @@ async function load() {
       }
       tbody.append(row);
     }
-    table.replaceChildren(thead, tbody);
+    const caption = table.caption;
+    if (!caption) throw new Error('Risk matrix caption missing');
+    table.replaceChildren(caption, thead, tbody);
     $('owners').replaceChildren(...owners.teams.map((team) => {
       const node = el('article', undefined, 'owner');
       const head = el('div', undefined, 'owner-head');
